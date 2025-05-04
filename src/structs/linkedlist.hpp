@@ -1,17 +1,16 @@
-#ifndef C0694388_E81D_42AE_9D6F_7ADA869CE8FD
-#define C0694388_E81D_42AE_9D6F_7ADA869CE8FD
 
+#ifndef LINKED_LIST_HPP
+#define LINKED_LIST_HPP
 
-#endif /* C0694388_E81D_42AE_9D6F_7ADA869CE8FD */
-#pragma once
 #include "../parser.hpp"
 #include <string>
+#include <sstream>
 
 struct Node {
-    Music data;
+    Music* data;  // Ponteiro para evitar cópias grandes
     Node* next;
 
-    Node(const Music& m) : data(m), next(nullptr) {}
+    Node(Music* m);
 };
 
 class LinkedList {
@@ -22,8 +21,10 @@ public:
     LinkedList();
     ~LinkedList();
 
-    void insert(const Music& m);
+    void insert(Music* m); // Usa ponteiro ao invés de cópia
     bool remove_by_id(const std::string& id);
     Music* find_by_name(const std::string& name);
     void print_sample(int n) const;
 };
+
+#endif
