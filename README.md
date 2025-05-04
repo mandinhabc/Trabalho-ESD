@@ -5,3 +5,7 @@
 ### Terminal 🪧
 
 &emsp; Para que o ter um bom funcionamento do sistema, foi utilizado o terminal MinGW64 inicialmente. O programa funciona normalmente no PoweShell atualemnte. 
+
+### Dataset 📊
+
+&emsp; Como o dataset utilizado é grande demais para o github (125mb em .zip) não foi possivel anexá-lo diretamente ao repositório, então em seu lugar está o link do Drive onde está o dataset.
