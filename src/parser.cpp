@@ -3,6 +3,27 @@
 #include <sstream>
 #include <iostream>
 
+// Divide uma linha CSV considerando campos entre aspas
+std::vector<std::string> split_csv_line(const std::string& line) {
+    std::vector<std::string> result;
+    std::string current;
+    bool inside_quotes = false;
+
+    for (char ch : line) {
+        if (ch == '"') {
+            inside_quotes = !inside_quotes;
+        } else if (ch == ',' && !inside_quotes) {
+            result.push_back(current);
+            current.clear();
+        } else {
+            current += ch;
+        }
+    }
+    result.push_back(current);
+    return result;
+}
+
+// Lê e processa o arquivo CSV
 std::vector<Music> load_music_dataset(const std::string& filename) {
     std::vector<Music> dataset;
     std::ifstream file(filename);
@@ -14,44 +35,37 @@ std::vector<Music> load_music_dataset(const std::string& filename) {
 
     std::string line;
     bool header_skipped = false;
+    int linha = 1;
 
     while (std::getline(file, line)) {
         if (!header_skipped) {
             header_skipped = true;
-            continue; // pula o cabeçalho
+            continue;
         }
 
-        std::stringstream ss(line);
-        std::string token;
-        Music music;
+        std::vector<std::string> campos = split_csv_line(line);
 
-        // Lê e ignora as colunas que não vamos usar
-        std::getline(ss, music.id, ',');
-        std::getline(ss, music.name, ',');
-        std::getline(ss, music.artist, ',');
-        std::getline(ss, token, ','); // daily_rank
-        std::getline(ss, token, ','); // daily_movement
-        std::getline(ss, token, ','); // weekly_movement
-        std::getline(ss, music.country, ',');
-        std::getline(ss, token, ','); // snapshot_date
-        std::getline(ss, token, ','); music.popularity = std::stoi(token);
-        std::getline(ss, token, ','); // is_explicit
-        std::getline(ss, token, ','); music.duration_ms = std::stoi(token);
-        std::getline(ss, token, ','); // album_name
-        std::getline(ss, token, ','); // album_release_date
-        std::getline(ss, token, ','); music.danceability = std::stod(token);
-        std::getline(ss, token, ','); music.energy = std::stod(token);
-        std::getline(ss, token, ','); // key
-        std::getline(ss, token, ','); // loudness
-        std::getline(ss, token, ','); // mode
-        std::getline(ss, token, ','); // speechiness
-        std::getline(ss, token, ','); // acousticness
-        std::getline(ss, token, ','); // instrumentalness
-        std::getline(ss, token, ','); // liveness
-        std::getline(ss, token, ','); // valence
-        std::getline(ss, token, ','); music.tempo = std::stod(token);
+        try {
+            if (campos.size() < 24) throw std::runtime_error("Colunas insuficientes");
 
-        dataset.push_back(music);
+            Music m;
+            m.id = campos[0];
+            m.name = campos[1];
+            m.artist = campos[2];
+            m.country = campos[6];
+            m.popularity = std::stoi(campos[8]);
+            m.is_explicit = campos[9];
+            m.duration_ms = std::stoi(campos[10]);
+            m.danceability = std::stod(campos[13]);
+            m.energy = std::stod(campos[14]);
+            m.tempo = std::stod(campos[22]);
+
+            dataset.push_back(m);
+        } catch (...) {
+            std::cerr << "⚠️ Erro ao processar linha " << linha << ": " << line << "\n";
+        }
+
+        linha++;
     }
 
     file.close();
