@@ -7,6 +7,7 @@ struct Music {
     std::string name;
     std::string artist;
     std::string country;
+    std::string is_explicit;
     int popularity;
     int duration_ms;
     double danceability;
