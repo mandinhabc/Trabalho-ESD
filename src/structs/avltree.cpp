@@ -2,6 +2,9 @@
 #include <iostream>
 #include <algorithm>
 
+
+AVLNode::AVLNode(const Music& m) : data(m), left(nullptr), right(nullptr), height(1) {}
+
 AVLTree::AVLTree() : root(nullptr) {}
 
 AVLTree::~AVLTree() {
@@ -46,34 +49,39 @@ AVLNode* AVLTree::leftRotate(AVLNode* x) {
     return y;
 }
 
+bool compareMusic(const Music& m1, const Music& m2) {
+    if (m1.popularity != m2.popularity)
+        return m1.popularity < m2.popularity;
+    return m1.name < m2.name;
+}
+
 AVLNode* AVLTree::insert(AVLNode* node, const Music& m) {
     if (!node)
         return new AVLNode(m);
 
-    if (m.popularity < node->data.popularity)
+    if (compareMusic(m, node->data))
         node->left = insert(node->left, m);
-    else if (m.popularity > node->data.popularity)
+    else if (compareMusic(node->data, m))
         node->right = insert(node->right, m);
     else
-        return node;  // ignorar duplicatas de popularidade
+        return node;  // música já existente
 
     node->height = 1 + std::max(height(node->left), height(node->right));
 
     int balance = getBalance(node);
 
-    // Casos de rotação
-    if (balance > 1 && m.popularity < node->left->data.popularity)
+    if (balance > 1 && compareMusic(m, node->left->data))
         return rightRotate(node);
 
-    if (balance < -1 && m.popularity > node->right->data.popularity)
+    if (balance < -1 && compareMusic(node->right->data, m))
         return leftRotate(node);
 
-    if (balance > 1 && m.popularity > node->left->data.popularity) {
+    if (balance > 1 && compareMusic(node->left->data, m)) {
         node->left = leftRotate(node->left);
         return rightRotate(node);
     }
 
-    if (balance < -1 && m.popularity < node->right->data.popularity) {
+    if (balance < -1 && compareMusic(m, node->right->data)) {
         node->right = rightRotate(node->right);
         return leftRotate(node);
     }
@@ -85,19 +93,20 @@ void AVLTree::insert(const Music& m) {
     root = insert(root, m);
 }
 
-Music* AVLTree::search(AVLNode* node, int popularity) {
-    if (!node) return nullptr;
+Music* AVLTree::search(AVLNode* node, const Music& m) {
+    if (!node)
+        return nullptr;
 
-    if (popularity == node->data.popularity)
+    if (m.popularity == node->data.popularity && m.name == node->data.name)
         return &node->data;
-    else if (popularity < node->data.popularity)
-        return search(node->left, popularity);
+    else if (compareMusic(m, node->data))
+        return search(node->left, m);
     else
-        return search(node->right, popularity);
+        return search(node->right, m);
 }
 
-Music* AVLTree::search(int popularity) {
-    return search(root, popularity);
+Music* AVLTree::search(const Music& m) {
+    return search(root, m);
 }
 
 void AVLTree::inOrderPrint(AVLNode* node) {
